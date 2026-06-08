@@ -29,11 +29,31 @@ jobs:
       - name: 3 · Ejecutar tests
         run: npm test
 
-      - name: 4 · Validar estado del Rollout en AWS vía SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ vars.K3S_SER_PUBLIC_IP }}  # <-- IMPORTANTE: Pon aquí la IP pública de tu instancia AWS
-          username: ubuntu
-          key: ${{ secrets.EA2_SSH_PRIVATE_KEY }}
-          script: |
-            sudo k3s kubectl rollout status deployment/demo-api --timeout=3m
+      # ─── 1 · PROBAR CONEXIÓN SSH ───
+      - name: 1.1 · SSH al servidor K3S
+        run: |
+          ssh -i-no-existente-ficticio -o StrictHostKeyChecking=accept-new "ubuntu@${{ vars.K3S_SERVER_PUBLIC_IP }}" 'echo ok'
+
+      # ─── 2 · DESCARGAR CÓDIGO (MANIFIESTOS) ───
+      - name: Checkout (manifiestos K8s)
+        uses: actions/checkout@v4
+
+      # ─── 3 · COPIAR Y APLICAR EN K3S ───
+      - name: Copiar k8s/ al servidor y aplicar
+        run: |
+          set -euo pipefail
+          test -d k8s || { echo "::error::Falta carpeta k8s/ en la raíz del repo"; exit 1; }
+          
+          # Limpiar directorio temporal e hilos viejos
+          ssh -o StrictHostKeyChecking=accept-new "ubuntu@${{ vars.K3S_SERVER_PUBLIC_IP }}" 'sudo rm -rf /tmp/k8s-deploy'
+          
+          # Copiar los nuevos archivos YAML al servidor AWS
+          scp -o StrictHostKeyChecking=accept-new -r k8s "ubuntu@${{ vars.K3S_SERVER_PUBLIC_IP }}:/tmp/k8s-deploy"
+          
+          # Aplicar los cambios en el clúster
+          ssh -o StrictHostKeyChecking=accept-new "ubuntu@${{ vars.K3S_SERVER_PUBLIC_IP }}" 'sudo k3s kubectl apply -f /tmp/k8s-deploy/'
+
+      # ─── 4 · NUEVO: VERIFICAR ROLLOUT ───
+      - name: 4 · Verificar estado del Rollout
+        run: |
+          ssh -o StrictHostKeyChecking=accept-new "ubuntu@${{ vars.K3S_SERVER_PUBLIC_IP }}" 'sudo k3s kubectl rollout status deployment/demo-api --timeout=3m'
