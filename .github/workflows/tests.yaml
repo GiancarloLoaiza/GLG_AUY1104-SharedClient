@@ -29,20 +29,11 @@ jobs:
       - name: 3 · Ejecutar tests
         run: npm test
 
-      - name: 4 · Autenticar en AWS
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: 4 · Validar estado del Rollout en AWS vía SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: us-east-1  # <-- CAMBIA ESTO por la región de tu instancia de AWS (ej. us-east-1, us-west-2, etc.)
-
-      - name: 5 · Validar estado del Rollout en EC2 vía SSM
-        uses: peterkimzz/aws-ssm-command-action@v1.1.0
-        with:
-          # Reemplaza 'i-xxxxxxxxxxxxxxxxx' por el ID real de tu instancia EC2 de AWS
-          instance-ids: 'i-xxxxxxxxxxxxxxxxx' 
-          comment: 'Validando el rollout de la API desde GitHub Actions'
-          working-directory: '/home/ubuntu'
-          command: |
+          host: TU_IP_PUBLICA_DE_EC2  # <-- IMPORTANTE: Pon aquí la IP pública de tu instancia AWS
+          username: ubuntu
+          key: ${{ secrets.EA2_SSH_PRIVATE_KEY }}
+          script: |
             sudo k3s kubectl rollout status deployment/demo-api --timeout=3m
