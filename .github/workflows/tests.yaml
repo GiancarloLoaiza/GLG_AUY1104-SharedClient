@@ -28,11 +28,7 @@ jobs:
 
       - name: 3 · Ejecutar tests
         run: npm test
-jobs:
-  run-tests:
-    name: Instalar dependencias y ejecutar tests
-    runs-on: ubuntu-latest
-    steps:
+
       - name: 4 · Autenticar en AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
