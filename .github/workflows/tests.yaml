@@ -27,3 +27,18 @@ jobs:
 
       - name: 3 · Ejecutar tests
         run: npm test
+jobs:
+  run-tests:
+    name: Instalar dependencias y ejecutar tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: 4 · Configurar Kubectl
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          # Usamos un secreto de GitHub para no exponer los accesos del servidor
+          kubeconfig: ${{ secrets.KUBERNETES_KUBECONFIG }}
+
+      - name: 5 · Validar estado del Rollout
+        run: |
+          kubectl rollout status deployment/demo-api --timeout=3m
