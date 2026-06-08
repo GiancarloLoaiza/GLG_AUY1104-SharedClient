@@ -32,7 +32,7 @@ jobs:
       - name: 4 · Validar estado del Rollout en AWS vía SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: TU_IP_PUBLICA_DE_EC2  # <-- IMPORTANTE: Pon aquí la IP pública de tu instancia AWS
+          host: ${{ inputs.K3S_SER_PUBLIC_IP }}  # <-- IMPORTANTE: Pon aquí la IP pública de tu instancia AWS
           username: ubuntu
           key: ${{ secrets.EA2_SSH_PRIVATE_KEY }}
           script: |
