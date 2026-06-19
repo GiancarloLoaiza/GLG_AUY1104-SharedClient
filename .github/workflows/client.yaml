@@ -11,13 +11,18 @@ on:
     tags:
       - 'v*.*.*'
   workflow_dispatch:
+    inputs:
+      version-tag:
+        description: 'Tag de la versión a probar (ej: v2.0.0)'
+        required: true
+        default: 'v2.0.0'
 
 jobs:
   usar-receta-compartida:
     uses: GiancarloLoaiza/GLG_AUY1104-SharedCentral/.github/workflows/deploy-api.yaml@main
     with:
       image-name: demo-api
-      image-tag: "v2.0.0"
+      image-tag: ${{ inputs.version-tag || github.ref_name }}
       k3s-server-public-ip: ${{ vars.K3S_SERVER_PUBLIC_IP }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
