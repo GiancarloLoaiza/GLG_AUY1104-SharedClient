@@ -17,7 +17,7 @@ spec:
       containers:
         - name: demo-api
           # 1er CAMBIO AQUI: Cambiamos :latest por un tag especifico
-          image: giancarloloaiza/demo-api:v2.0.0 
+          image: giancarloloaiza/demo-api:__IMAGE_TAG__ 
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
