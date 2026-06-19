@@ -16,16 +16,32 @@ spec:
     spec:
       containers:
         - name: demo-api
-          # 1er CAMBIO AQUI: Cambiamos :latest por un tag específico
+          # 1er CAMBIO AQUI: Cambiamos :latest por un tag especifico
           image: giancarloloaiza/demo-api:v2.0.0 
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
+          
+          # ─── NUEVO CAMBIO: READINESS Y LIVENESS PROBES ────────────────────────
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+          # ──────────────────────────────────────────────────────────────────────
+
           resources:
             requests:
               cpu: "50m"
               memory: "64Mi"
             limits:
               cpu: "200m"
-              # 2do CAMBIO AQUI: Subimos el límite de 128Mi a 256Mi
+              # 2do CAMBIO AQUI: Subimos el limite de 128Mi a 256Mi
               memory: "256Mi"
