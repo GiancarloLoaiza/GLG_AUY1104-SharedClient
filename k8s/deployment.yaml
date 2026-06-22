@@ -6,6 +6,8 @@ metadata:
     app: demo-api
 spec:
   replicas: 2
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: demo-api
